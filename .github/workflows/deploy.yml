@@ -7,11 +7,11 @@ on:
 
 jobs:
   build-and-push:
-    name: Build & Push imagen a Docker Hub
+    name: Build y Push imagen a Docker Hub
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout del código
+      - name: Checkout del codigo
         uses: actions/checkout@v3
 
       - name: Login en Docker Hub
@@ -40,20 +40,13 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Detener y eliminar contenedor anterior si existe
             docker stop vzeta-nginx || true
             docker rm vzeta-nginx || true
-
-            # Descargar la imagen más reciente
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/vzeta-nginx:latest
-
-            # Iniciar el nuevo contenedor con Bind Mount
             docker run -d \
               --name vzeta-nginx \
               --restart unless-stopped \
               -p 80:80 \
               -v /home/ubuntu/vzeta-app:/usr/share/nginx/html \
               ${{ secrets.DOCKERHUB_USERNAME }}/vzeta-nginx:latest
-
-            # Verificar que está corriendo
             docker ps | grep vzeta-nginx
